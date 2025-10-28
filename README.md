@@ -310,6 +310,8 @@ Try out or [live example](https://codesandbox.io/s/langflow-embedded-chat-exampl
 
 You can restore previous chat conversations by passing the `initial_messages` prop. This is particularly useful when integrating with Laravel or other backend frameworks where chat history is stored in a database.
 
+**Important:** The `initial_messages` should be set before the widget is rendered or immediately on page load. Once set, the messages will be displayed in the chat window.
+
 ### Example with Laravel and jQuery
 
 ```html
@@ -359,6 +361,19 @@ Each message in the `initial_messages` array should follow this structure:
   "isSend": true,  // true for user messages, false for bot messages
   "error": false   // optional, true to display as error message
 }
+```
+
+### Example with Static HTML (Direct Attribute)
+
+For static pages where you know the history beforehand, you can set the attribute directly:
+
+```html
+<langflow-chat
+    host_url="your_langflow_url"
+    flow_id="your_flow_id"
+    api_key="your_api_key"
+    initial_messages='[{"message":"Previous question","isSend":true},{"message":"Previous answer","isSend":false}]'
+></langflow-chat>
 ```
 
 ## License
