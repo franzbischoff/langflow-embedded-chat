@@ -124,6 +124,7 @@ Use the widget API to customize your widget:
 | window_title          | string    | No       |
 | session_id            | string    | No       |
 | additional_headers    | json      | No       |
+| initial_messages      | json      | No       |
 
 **api_key:**
 - Type: String
@@ -287,6 +288,16 @@ Use the widget API to customize your widget:
 - Description: Additional headers to be sent to Langflow server
 - Example: `{ "X-Custom-Header": "value" }`
 
+**initial_messages:**
+- Type: JSON
+- Required: No
+- Description: Array of initial messages to pre-populate the chat history. Useful for restoring previous conversations from a database.
+- Example: `[{"message": "Hello!", "isSend": true}, {"message": "Hi there! How can I help?", "isSend": false}]`
+- Message Format: Each message object should have:
+  - `message` (string): The message text
+  - `isSend` (boolean): `true` for user messages, `false` for bot messages
+  - `error` (boolean, optional): `true` to display as error message
+
 
 ## Live example:
 Try out or [live example](https://codesandbox.io/s/langflow-embedded-chat-example-dv9zpx) to see how the Langflow Embedded Chat ⛓️ works. 
@@ -294,6 +305,79 @@ Try out or [live example](https://codesandbox.io/s/langflow-embedded-chat-exampl
 1. first create a Flow and save it using [Langflow ⛓️](https://github.com/logspace-ai/langflow).
 2. Get the hosted URL to use in the live example.
 3. If you are using a public host (like [Hugging Face Spaces](https://huggingface.co/spaces/Logspace/Langflow)) use tweaks to keep your API keys safe.
+
+## Restoring Chat History
+
+You can restore previous chat conversations by passing the `initial_messages` prop. This is particularly useful when integrating with Laravel or other backend frameworks where chat history is stored in a database.
+
+**Important:** The `initial_messages` should be set before the widget is rendered or immediately on page load. Once set, the messages will be displayed in the chat window.
+
+### Example with Laravel and jQuery
+
+```html
+<html lang="en">
+<head>
+<script src="https://cdn.jsdelivr.net/gh/logspace-ai/langflow-embedded-chat@v1.0.7/dist/build/static/js/bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div id="chat-container"></div>
+
+<script>
+// Fetch chat history from your Laravel backend
+$.ajax({
+    url: '/api/chat-history',
+    method: 'GET',
+    success: function(history) {
+        // Transform your database records to the required format
+        var messages = history.map(function(msg) {
+            return {
+                message: msg.content,
+                isSend: msg.is_user_message, // true for user, false for bot
+                error: false
+            };
+        });
+        
+        // Create the chat widget with initial messages
+        var chatWidget = document.createElement('langflow-chat');
+        chatWidget.setAttribute('id', 'chat-widget');
+        chatWidget.setAttribute('host_url', 'your_langflow_url');
+        chatWidget.setAttribute('flow_id', 'your_flow_id');
+        chatWidget.setAttribute('api_key', 'your_api_key');
+        chatWidget.setAttribute('initial_messages', JSON.stringify(messages));
+        
+        document.getElementById('chat-container').appendChild(chatWidget);
+    }
+});
+</script>
+</body>
+</html>
+```
+
+### Message Format
+
+Each message in the `initial_messages` array should follow this structure:
+
+```json
+{
+  "message": "The message text",
+  "isSend": true,  // true for user messages, false for bot messages
+  "error": false   // optional, true to display as error message
+}
+```
+
+### Example with Static HTML (Direct Attribute)
+
+For static pages where you know the history beforehand, you can set the attribute directly:
+
+```html
+<langflow-chat
+    host_url="your_langflow_url"
+    flow_id="your_flow_id"
+    api_key="your_api_key"
+    initial_messages='[{"message":"Previous question","isSend":true},{"message":"Previous answer","isSend":false}]'
+></langflow-chat>
+```
 
 ## License
 

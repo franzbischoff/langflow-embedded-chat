@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test: Initial Messages Feature</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .description {
+            background: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #2196F3;
+            margin: 15px 0;
+        }
+        .chat-container {
+            margin-top: 20px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+    <script src="./dist/build/static/js/bundle.min.js"></script>
+</head>
+<body>
+    <h1>🧪 Testing Initial Messages Feature</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Empty Chat (No History)</h2>
+        <div class="description">
+            This chat widget starts with no messages. This is the default behavior.
+        </div>
+        <div class="chat-container">
+            <langflow-chat 
+                id="chat-empty"
+                window_title="Empty Chat" 
+                flow_id="test-flow-1"
+                host_url="http://localhost:7860"
+                width="400"
+                height="500"
+                start_open="true"
+            ></langflow-chat>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Chat with Pre-loaded History</h2>
+        <div class="description">
+            This chat widget is pre-populated with conversation history.
+            This simulates loading messages from a database.
+            <br><strong>Note:</strong> The widget is dynamically created with history already set.
+        </div>
+        <button onclick="createWidgetWithHistory()">Create Widget with History</button>
+        <div class="chat-container" id="history-container">
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Laravel/jQuery Simulation</h2>
+        <div class="description">
+            This simulates a Laravel backend integration where chat history is fetched via AJAX.
+            <br><strong>Note:</strong> The widget is created after data is fetched.
+        </div>
+        <button onclick="simulateLaravelFetch(event)">Simulate Laravel Fetch</button>
+        <div class="chat-container" id="laravel-container">
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 4: Mixed Messages (User + Bot + Errors)</h2>
+        <div class="description">
+            This demonstrates all message types: user messages, bot messages, and error messages.
+            <br><strong>Note:</strong> The widget is dynamically created with all message types.
+        </div>
+        <button onclick="createWidgetWithMixedMessages()">Create Widget with Mixed Messages</button>
+        <div class="chat-container" id="mixed-container">
+        </div>
+    </div>
+
+    <script>
+        function createWidgetWithHistory() {
+            const chatHistory = [
+                {
+                    message: "Hello! I need help with my order.",
+                    isSend: true,
+                    error: false
+                },
+                {
+                    message: "Hi there! I'd be happy to help you with your order. Could you please provide your order number?",
+                    isSend: false,
+                    error: false
+                },
+                {
+                    message: "My order number is #12345",
+                    isSend: true,
+                    error: false
+                },
+                {
+                    message: "Thank you! Let me look that up for you. I can see your order was shipped yesterday and should arrive within 2-3 business days.",
+                    isSend: false,
+                    error: false
+                }
+            ];
+
+            const container = document.getElementById('history-container');
+            container.innerHTML = ''; // Clear existing content
+            
+            const widget = document.createElement('langflow-chat');
+            widget.setAttribute('id', 'chat-with-history');
+            widget.setAttribute('window_title', 'Chat with History');
+            widget.setAttribute('flow_id', 'test-flow-2');
+            widget.setAttribute('host_url', 'http://localhost:7860');
+            widget.setAttribute('width', '400');
+            widget.setAttribute('height', '500');
+            widget.setAttribute('start_open', 'true');
+            widget.setAttribute('initial_messages', JSON.stringify(chatHistory));
+            
+            container.appendChild(widget);
+        }
+
+        function simulateLaravelFetch(event) {
+            // Simulate an AJAX call delay
+            const button = event ? event.target : null;
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Fetching...';
+            }            
+            setTimeout(function() {
+                // Simulate Laravel backend response
+                const laravelResponse = [
+                    {
+                        id: 1,
+                        content: "Can you help me reset my password?",
+                        is_user_message: true,
+                        created_at: "2024-01-15 10:30:00"
+                    },
+                    {
+                        id: 2,
+                        content: "Of course! I'll send you a password reset link to your email. Please check your inbox.",
+                        is_user_message: false,
+                        created_at: "2024-01-15 10:30:15"
+                    },
+                    {
+                        id: 3,
+                        content: "I received the email, thanks!",
+                        is_user_message: true,
+                        created_at: "2024-01-15 10:31:00"
+                    }
+                ];
+
+                // Transform to chat format
+                const messages = laravelResponse.map(function(msg) {
+                    return {
+                        message: msg.content,
+                        isSend: msg.is_user_message,
+                        error: false
+                    };
+                });
+
+                const container = document.getElementById('laravel-container');
+                container.innerHTML = ''; // Clear existing content
+                
+                const widget = document.createElement('langflow-chat');
+                widget.setAttribute('id', 'chat-laravel');
+                widget.setAttribute('window_title', 'Laravel Integration');
+                widget.setAttribute('flow_id', 'test-flow-3');
+                widget.setAttribute('host_url', 'http://localhost:7860');
+                widget.setAttribute('width', '400');
+                widget.setAttribute('height', '500');
+                widget.setAttribute('start_open', 'true');
+                widget.setAttribute('initial_messages', JSON.stringify(messages));
+                
+                container.appendChild(widget);
+                
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = 'Simulate Laravel Fetch';
+                }
+            }, 500);
+        }
+
+        function createWidgetWithMixedMessages() {
+            const mixedMessages = [
+                {
+                    message: "What's your return policy?",
+                    isSend: true,
+                    error: false
+                },
+                {
+                    message: "We offer a 30-day return policy for all items.",
+                    isSend: false,
+                    error: false
+                },
+                {
+                    message: "Can I return an item after 30 days?",
+                    isSend: true,
+                    error: false
+                },
+                {
+                    message: "I apologize, but I'm having trouble connecting to our database.",
+                    isSend: false,
+                    error: true
+                },
+                {
+                    message: "Let me try again...",
+                    isSend: true,
+                    error: false
+                },
+                {
+                    message: "Thank you for your patience! Items purchased after 30 days can be exchanged for store credit within 60 days.",
+                    isSend: false,
+                    error: false
+                }
+            ];
+
+            const container = document.getElementById('mixed-container');
+            container.innerHTML = ''; // Clear existing content
+            
+            const widget = document.createElement('langflow-chat');
+            widget.setAttribute('id', 'chat-mixed');
+            widget.setAttribute('window_title', 'Mixed Messages');
+            widget.setAttribute('flow_id', 'test-flow-4');
+            widget.setAttribute('host_url', 'http://localhost:7860');
+            widget.setAttribute('width', '400');
+            widget.setAttribute('height', '500');
+            widget.setAttribute('start_open', 'true');
+            widget.setAttribute('initial_messages', JSON.stringify(mixedMessages));
+            
+            container.appendChild(widget);
+        }
+    </script>
+
+    <div style="margin-top: 40px; padding: 20px; background: #e7f3ff; border-radius: 5px;">
+        <h3>📝 How to Use:</h3>
+        <ol>
+            <li>Click the buttons in each test section to create widgets with history</li>
+            <li>The widgets are created dynamically with messages already loaded</li>
+            <li>In production, fetch data from your backend before creating the widget</li>
+        </ol>
+        
+        <h3>⚠️ Important Notes:</h3>
+        <ul>
+            <li>The <code>initial_messages</code> attribute must be set <strong>before</strong> the widget is rendered</li>
+            <li>Setting it after initialization will not update the messages</li>
+            <li>For dynamic loading, create the widget element programmatically after fetching data</li>
+        </ul>
+        
+        <h3>💡 Message Format:</h3>
+        <pre style="background: white; padding: 10px; border-radius: 4px;">{
+  "message": "The message text",
+  "isSend": true,  // true for user, false for bot
+  "error": false   // optional, true for error messages
+}</pre>
+    </div>
+</body>
+</html>

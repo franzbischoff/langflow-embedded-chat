@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Langflow Chat with History Example</title>
+    <script src="./dist/build/static/js/bundle.min.js"></script>
+</head>
+<body style="width: 100vh; height: 100vh;">
+    <h1>Langflow Chat with Pre-loaded History</h1>
+    <p>This example demonstrates how to inject chat history into the widget.</p>
+    
+    <!-- Example 1: Chat with initial messages -->
+    <langflow-chat 
+        id="chat-with-history"
+        window_title="Chat with History" 
+        flow_id="your-flow-id"
+        host_url="http://localhost:7860"
+        width="700"
+    ></langflow-chat>
+
+    <script>
+        // Simulate fetching chat history from a database
+        // In a real Laravel application, this would be an AJAX call
+        const chatHistory = [
+            {
+                message: "Hello! I need help with my order.",
+                isSend: true,
+                error: false
+            },
+            {
+                message: "Hi there! I'd be happy to help you with your order. Could you please provide your order number?",
+                isSend: false,
+                error: false
+            },
+            {
+                message: "My order number is #12345",
+                isSend: true,
+                error: false
+            },
+            {
+                message: "Thank you! Let me look that up for you...",
+                isSend: false,
+                error: false
+            }
+        ];
+
+        // Set the initial messages on the chat widget
+        document.getElementById('chat-with-history').setAttribute('initial_messages', JSON.stringify(chatHistory));
+    </script>
+
+    <hr>
+
+    <!-- Example 2: Laravel/jQuery integration example -->
+    <h2>Laravel/jQuery Integration Example:</h2>
+    <pre style="background: #f4f4f4; padding: 15px; border-radius: 5px;">
+&lt;langflow-chat
+    id="chat-widget"
+    host_url="your_langflow_url"
+    flow_id="your_flow_id"
+    api_key="your_api_key"
+&gt;&lt;/langflow-chat&gt;
+
+&lt;script&gt;
+// Fetch chat history from your Laravel backend
+$.ajax({
+    url: '/api/chat-history',
+    method: 'GET',
+    success: function(history) {
+        // Transform your database records to the required format
+        var messages = history.map(function(msg) {
+            return {
+                message: msg.content,
+                isSend: msg.is_user_message, // true for user, false for bot
+                error: false
+            };
+        });
+        
+        // Set the initial messages on the chat widget
+        document.getElementById('chat-widget').setAttribute('initial_messages', JSON.stringify(messages));
+    }
+});
+&lt;/script&gt;
+    </pre>
+</body>
+</html>
