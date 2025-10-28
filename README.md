@@ -124,6 +124,7 @@ Use the widget API to customize your widget:
 | window_title          | string    | No       |
 | session_id            | string    | No       |
 | additional_headers    | json      | No       |
+| initial_messages      | json      | No       |
 
 **api_key:**
 - Type: String
@@ -287,6 +288,16 @@ Use the widget API to customize your widget:
 - Description: Additional headers to be sent to Langflow server
 - Example: `{ "X-Custom-Header": "value" }`
 
+**initial_messages:**
+- Type: JSON
+- Required: No
+- Description: Array of initial messages to pre-populate the chat history. Useful for restoring previous conversations from a database.
+- Example: `[{"message": "Hello!", "isSend": true}, {"message": "Hi there! How can I help?", "isSend": false}]`
+- Message Format: Each message object should have:
+  - `message` (string): The message text
+  - `isSend` (boolean): `true` for user messages, `false` for bot messages
+  - `error` (boolean, optional): `true` to display as error message
+
 
 ## Live example:
 Try out or [live example](https://codesandbox.io/s/langflow-embedded-chat-example-dv9zpx) to see how the Langflow Embedded Chat ⛓️ works. 
@@ -294,6 +305,61 @@ Try out or [live example](https://codesandbox.io/s/langflow-embedded-chat-exampl
 1. first create a Flow and save it using [Langflow ⛓️](https://github.com/logspace-ai/langflow).
 2. Get the hosted URL to use in the live example.
 3. If you are using a public host (like [Hugging Face Spaces](https://huggingface.co/spaces/Logspace/Langflow)) use tweaks to keep your API keys safe.
+
+## Restoring Chat History
+
+You can restore previous chat conversations by passing the `initial_messages` prop. This is particularly useful when integrating with Laravel or other backend frameworks where chat history is stored in a database.
+
+### Example with Laravel and jQuery
+
+```html
+<html lang="en">
+<head>
+<script src="https://cdn.jsdelivr.net/gh/logspace-ai/langflow-embedded-chat@v1.0.7/dist/build/static/js/bundle.min.js"></script>
+</head>
+<body>
+<langflow-chat
+    id="chat-widget"
+    host_url="your_langflow_url"
+    flow_id="your_flow_id"
+    api_key="your_api_key"
+></langflow-chat>
+
+<script>
+// Fetch chat history from your Laravel backend
+$.ajax({
+    url: '/api/chat-history',
+    method: 'GET',
+    success: function(history) {
+        // Transform your database records to the required format
+        var messages = history.map(function(msg) {
+            return {
+                message: msg.content,
+                isSend: msg.is_user_message, // true for user, false for bot
+                error: false
+            };
+        });
+        
+        // Set the initial messages on the chat widget
+        document.getElementById('chat-widget').setAttribute('initial_messages', JSON.stringify(messages));
+    }
+});
+</script>
+</body>
+</html>
+```
+
+### Message Format
+
+Each message in the `initial_messages` array should follow this structure:
+
+```json
+{
+  "message": "The message text",
+  "isSend": true,  // true for user messages, false for bot messages
+  "error": false   // optional, true to display as error message
+}
+```
 
 ## License
 
