@@ -85,7 +85,7 @@
             This simulates a Laravel backend integration where chat history is fetched via AJAX.
             <br><strong>Note:</strong> The widget is created after data is fetched.
         </div>
-        <button onclick="simulateLaravelFetch()">Simulate Laravel Fetch</button>
+        <button onclick="simulateLaravelFetch(event)">Simulate Laravel Fetch</button>
         <div class="chat-container" id="laravel-container">
         </div>
     </div>
@@ -142,12 +142,13 @@
             container.appendChild(widget);
         }
 
-        function simulateLaravelFetch() {
+        function simulateLaravelFetch(event) {
             // Simulate an AJAX call delay
-            const button = event.target;
-            button.disabled = true;
-            button.textContent = 'Fetching...';
-            
+            const button = event ? event.target : null;
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Fetching...';
+            }            
             setTimeout(function() {
                 // Simulate Laravel backend response
                 const laravelResponse = [
@@ -195,8 +196,10 @@
                 
                 container.appendChild(widget);
                 
-                button.disabled = false;
-                button.textContent = 'Simulate Laravel Fetch';
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = 'Simulate Laravel Fetch';
+                }
             }, 500);
         }
 
