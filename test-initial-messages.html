@@ -72,18 +72,10 @@
         <div class="description">
             This chat widget is pre-populated with conversation history.
             This simulates loading messages from a database.
+            <br><strong>Note:</strong> The widget is dynamically created with history already set.
         </div>
-        <button onclick="loadHistory()">Load History</button>
-        <div class="chat-container">
-            <langflow-chat 
-                id="chat-with-history"
-                window_title="Chat with History" 
-                flow_id="test-flow-2"
-                host_url="http://localhost:7860"
-                width="400"
-                height="500"
-                start_open="true"
-            ></langflow-chat>
+        <button onclick="createWidgetWithHistory()">Create Widget with History</button>
+        <div class="chat-container" id="history-container">
         </div>
     </div>
 
@@ -91,18 +83,10 @@
         <h2>Test 3: Laravel/jQuery Simulation</h2>
         <div class="description">
             This simulates a Laravel backend integration where chat history is fetched via AJAX.
+            <br><strong>Note:</strong> The widget is created after data is fetched.
         </div>
         <button onclick="simulateLaravelFetch()">Simulate Laravel Fetch</button>
-        <div class="chat-container">
-            <langflow-chat 
-                id="chat-laravel"
-                window_title="Laravel Integration" 
-                flow_id="test-flow-3"
-                host_url="http://localhost:7860"
-                width="400"
-                height="500"
-                start_open="true"
-            ></langflow-chat>
+        <div class="chat-container" id="laravel-container">
         </div>
     </div>
 
@@ -110,23 +94,15 @@
         <h2>Test 4: Mixed Messages (User + Bot + Errors)</h2>
         <div class="description">
             This demonstrates all message types: user messages, bot messages, and error messages.
+            <br><strong>Note:</strong> The widget is dynamically created with all message types.
         </div>
-        <button onclick="loadMixedMessages()">Load Mixed Messages</button>
-        <div class="chat-container">
-            <langflow-chat 
-                id="chat-mixed"
-                window_title="Mixed Messages" 
-                flow_id="test-flow-4"
-                host_url="http://localhost:7860"
-                width="400"
-                height="500"
-                start_open="true"
-            ></langflow-chat>
+        <button onclick="createWidgetWithMixedMessages()">Create Widget with Mixed Messages</button>
+        <div class="chat-container" id="mixed-container">
         </div>
     </div>
 
     <script>
-        function loadHistory() {
+        function createWidgetWithHistory() {
             const chatHistory = [
                 {
                     message: "Hello! I need help with my order.",
@@ -150,12 +126,28 @@
                 }
             ];
 
-            document.getElementById('chat-with-history').setAttribute('initial_messages', JSON.stringify(chatHistory));
-            alert('History loaded! Refresh the page to see the messages.');
+            const container = document.getElementById('history-container');
+            container.innerHTML = ''; // Clear existing content
+            
+            const widget = document.createElement('langflow-chat');
+            widget.setAttribute('id', 'chat-with-history');
+            widget.setAttribute('window_title', 'Chat with History');
+            widget.setAttribute('flow_id', 'test-flow-2');
+            widget.setAttribute('host_url', 'http://localhost:7860');
+            widget.setAttribute('width', '400');
+            widget.setAttribute('height', '500');
+            widget.setAttribute('start_open', 'true');
+            widget.setAttribute('initial_messages', JSON.stringify(chatHistory));
+            
+            container.appendChild(widget);
         }
 
         function simulateLaravelFetch() {
             // Simulate an AJAX call delay
+            const button = event.target;
+            button.disabled = true;
+            button.textContent = 'Fetching...';
+            
             setTimeout(function() {
                 // Simulate Laravel backend response
                 const laravelResponse = [
@@ -188,12 +180,27 @@
                     };
                 });
 
-                document.getElementById('chat-laravel').setAttribute('initial_messages', JSON.stringify(messages));
-                alert('Laravel data loaded! Refresh the page to see the messages.');
+                const container = document.getElementById('laravel-container');
+                container.innerHTML = ''; // Clear existing content
+                
+                const widget = document.createElement('langflow-chat');
+                widget.setAttribute('id', 'chat-laravel');
+                widget.setAttribute('window_title', 'Laravel Integration');
+                widget.setAttribute('flow_id', 'test-flow-3');
+                widget.setAttribute('host_url', 'http://localhost:7860');
+                widget.setAttribute('width', '400');
+                widget.setAttribute('height', '500');
+                widget.setAttribute('start_open', 'true');
+                widget.setAttribute('initial_messages', JSON.stringify(messages));
+                
+                container.appendChild(widget);
+                
+                button.disabled = false;
+                button.textContent = 'Simulate Laravel Fetch';
             }, 500);
         }
 
-        function loadMixedMessages() {
+        function createWidgetWithMixedMessages() {
             const mixedMessages = [
                 {
                     message: "What's your return policy?",
@@ -227,18 +234,37 @@
                 }
             ];
 
-            document.getElementById('chat-mixed').setAttribute('initial_messages', JSON.stringify(mixedMessages));
-            alert('Mixed messages loaded! Refresh the page to see all message types.');
+            const container = document.getElementById('mixed-container');
+            container.innerHTML = ''; // Clear existing content
+            
+            const widget = document.createElement('langflow-chat');
+            widget.setAttribute('id', 'chat-mixed');
+            widget.setAttribute('window_title', 'Mixed Messages');
+            widget.setAttribute('flow_id', 'test-flow-4');
+            widget.setAttribute('host_url', 'http://localhost:7860');
+            widget.setAttribute('width', '400');
+            widget.setAttribute('height', '500');
+            widget.setAttribute('start_open', 'true');
+            widget.setAttribute('initial_messages', JSON.stringify(mixedMessages));
+            
+            container.appendChild(widget);
         }
     </script>
 
     <div style="margin-top: 40px; padding: 20px; background: #e7f3ff; border-radius: 5px;">
         <h3>📝 How to Use:</h3>
         <ol>
-            <li>Click the buttons in each test section</li>
-            <li>Refresh the page to see the messages loaded</li>
-            <li>Or set the <code>initial_messages</code> attribute before page load</li>
+            <li>Click the buttons in each test section to create widgets with history</li>
+            <li>The widgets are created dynamically with messages already loaded</li>
+            <li>In production, fetch data from your backend before creating the widget</li>
         </ol>
+        
+        <h3>⚠️ Important Notes:</h3>
+        <ul>
+            <li>The <code>initial_messages</code> attribute must be set <strong>before</strong> the widget is rendered</li>
+            <li>Setting it after initialization will not update the messages</li>
+            <li>For dynamic loading, create the widget element programmatically after fetching data</li>
+        </ul>
         
         <h3>💡 Message Format:</h3>
         <pre style="background: white; padding: 10px; border-radius: 4px;">{

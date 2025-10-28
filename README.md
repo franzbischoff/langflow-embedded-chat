@@ -318,14 +318,10 @@ You can restore previous chat conversations by passing the `initial_messages` pr
 <html lang="en">
 <head>
 <script src="https://cdn.jsdelivr.net/gh/logspace-ai/langflow-embedded-chat@v1.0.7/dist/build/static/js/bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-<langflow-chat
-    id="chat-widget"
-    host_url="your_langflow_url"
-    flow_id="your_flow_id"
-    api_key="your_api_key"
-></langflow-chat>
+<div id="chat-container"></div>
 
 <script>
 // Fetch chat history from your Laravel backend
@@ -342,8 +338,15 @@ $.ajax({
             };
         });
         
-        // Set the initial messages on the chat widget
-        document.getElementById('chat-widget').setAttribute('initial_messages', JSON.stringify(messages));
+        // Create the chat widget with initial messages
+        var chatWidget = document.createElement('langflow-chat');
+        chatWidget.setAttribute('id', 'chat-widget');
+        chatWidget.setAttribute('host_url', 'your_langflow_url');
+        chatWidget.setAttribute('flow_id', 'your_flow_id');
+        chatWidget.setAttribute('api_key', 'your_api_key');
+        chatWidget.setAttribute('initial_messages', JSON.stringify(messages));
+        
+        document.getElementById('chat-container').appendChild(chatWidget);
     }
 });
 </script>
