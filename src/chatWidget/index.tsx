@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ChatTrigger from "./chatTrigger";
 import ChatWindow from "./chatWindow";
 import { ChatMessageType } from "../types/chatWidget";
@@ -32,7 +32,8 @@ export default function ChatWidget({
   input_container_style,
   additional_headers,
   session_id,
-  start_open=false,
+  start_open = false,
+  initial_messages = [],
 }: {
   api_key?: string;
   input_value: string,
@@ -63,10 +64,28 @@ export default function ChatWidget({
   additional_headers?: { [key: string]: string };
   session_id?: string;
   start_open?: boolean;
+  initial_messages?: ChatMessageType[];
 }) {
   const [open, setOpen] = useState(start_open);
-  const [messages, setMessages] = useState<ChatMessageType[]>([]);
+  const [messages, setMessages] = useState<ChatMessageType[]>(() =>
+    Array.isArray(initial_messages) ? [...initial_messages] : []
+  );
   const sessionId = useRef(session_id ?? uuidv4());
+
+  useEffect(() => {
+    const nextMessages = Array.isArray(initial_messages)
+      ? [...initial_messages]
+      : [];
+    setMessages((prev) => {
+      if (
+        prev.length === nextMessages.length &&
+        prev.every((msg, index) => msg === nextMessages[index])
+      ) {
+        return prev;
+      }
+      return nextMessages;
+    });
+  }, [initial_messages]);
   function updateLastMessage(message: ChatMessageType) {
     setMessages((prev) => {
       prev[prev.length - 1] = message;
@@ -905,7 +924,7 @@ video {
   --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-} 
+}
 input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
   color: rgb(156 163 175);
   opacity: 1; /* Firefox */
