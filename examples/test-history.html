@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste - Chat com Histórico</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Após compilar, use: -->
+  <!-- <script src="../dist/build/static/js/bundle.min.js"></script> -->
+  <!-- Ou use a versão CDN (quando disponível): -->
+  <script
+    src="https://cdn.jsdelivr.net/gh/logspace-ai/langflow-embedded-chat@v1.0.7/dist/build/static/js/bundle.min.js"></script>
+</head>
+
+<body style="font-family: Arial, sans-serif; padding: 20px;">
+  <h1>🧪 Teste - Chat Widget com Histórico</h1>
+
+  <p>Este é um exemplo simples para testar o histórico do chat.</p>
+
+  <h2>Configuração:</h2>
+  <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <p><strong>Host URL:</strong> <input type="text" id="host_url" value="http://localhost:7860" style="width: 300px;">
+    </p>
+    <p><strong>Flow ID:</strong> <input type="text" id="flow_id" value="seu-flow-id" style="width: 300px;"></p>
+    <p><strong>API Key:</strong> <input type="text" id="api_key" value="sua-api-key" style="width: 300px;"></p>
+    <p><strong>User ID:</strong> <input type="text" id="user_id" value="123" style="width: 300px;"></p>
+  </div>
+
+  <h2>Histórico de Teste:</h2>
+  <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+    <textarea id="history_json" style="width: 100%; height: 200px; font-family: monospace;">
+[
+  {"message": "Olá! Como está?", "isSend": true},
+  {"message": "Olá! Estou bem, obrigado. Como posso ajudá-lo hoje?", "isSend": false},
+  {"message": "Preciso de ajuda com o meu pedido #12345", "isSend": true},
+  {"message": "Claro! Vou verificar o status do seu pedido #12345. Um momento por favor.", "isSend": false},
+  {"message": "O seu pedido foi enviado ontem e deve chegar em 2-3 dias úteis.", "isSend": false}
+]
+        </textarea>
+  </div>
+
+  <button onclick="initChat()"
+    style="background: #1976d2; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+    🚀 Iniciar Chat com Histórico
+  </button>
+
+  <button onclick="clearChat()"
+    style="background: #d32f2f; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-left: 10px;">
+    🗑️ Limpar Chat
+  </button>
+
+  <hr style="margin: 30px 0;">
+
+  <!-- Container do chat -->
+  <div id="chat-container"></div>
+
+  <script>
+    let chatElement = null;
+
+    function initChat() {
+      // Limpar chat anterior se existir
+      clearChat();
+
+      try {
+        // Obter configurações
+        const hostUrl = document.getElementById('host_url').value;
+        const flowId = document.getElementById('flow_id').value;
+        const apiKey = document.getElementById('api_key').value;
+        const userId = document.getElementById('user_id').value;
+
+        // Obter histórico
+        const historyText = document.getElementById('history_json').value;
+        let history = [];
+
+        try {
+          history = JSON.parse(historyText);
+          console.log('✅ Histórico parseado com sucesso:', history);
+        } catch (e) {
+          alert('❌ Erro ao parsear o JSON do histórico: ' + e.message);
+          return;
+        }
+
+        // Criar elemento do chat
+        chatElement = document.createElement('langflow-chat');
+
+        // Configurar propriedades
+        chatElement.setAttribute('host_url', hostUrl);
+        chatElement.setAttribute('flow_id', flowId);
+        chatElement.setAttribute('api_key', apiKey);
+        chatElement.setAttribute('session_id', 'user-' + userId);
+
+        // Configurações de interface
+        chatElement.setAttribute('window_title', 'Chat de Teste');
+        chatElement.setAttribute('placeholder', 'Digite sua mensagem...');
+        chatElement.setAttribute('chat_position', 'bottom-right');
+        chatElement.setAttribute('width', '400');
+        chatElement.setAttribute('height', '600');
+        chatElement.setAttribute('start_open', 'true');  // Abrir automaticamente
+
+        // ⭐ INJETAR HISTÓRICO ⭐
+        if (history && history.length > 0) {
+          chatElement.setAttribute('initial_messages', JSON.stringify(history));
+          console.log('✅ Histórico injetado:', history.length, 'mensagens');
+        }
+
+        // Adicionar ao DOM
+        document.getElementById('chat-container').appendChild(chatElement);
+
+        console.log('✅ Chat inicializado com sucesso!');
+        alert('✅ Chat inicializado! Verifique se as mensagens do histórico aparecem.');
+
+      } catch (e) {
+        console.error('❌ Erro ao inicializar chat:', e);
+        alert('❌ Erro: ' + e.message);
+      }
+    }
+
+    function clearChat() {
+      const container = document.getElementById('chat-container');
+      container.innerHTML = '';
+      chatElement = null;
+      console.log('🗑️ Chat limpo');
+    }
+
+    // Exemplos de histórico para testar
+    function loadExample(exampleNum) {
+      const examples = {
+        1: [
+          { "message": "Olá!", "isSend": true },
+          { "message": "Olá! Como posso ajudar?", "isSend": false }
+        ],
+        2: [
+          { "message": "Qual é o status do meu pedido?", "isSend": true },
+          { "message": "Vou verificar para você.", "isSend": false },
+          { "message": "Seu pedido foi enviado!", "isSend": false }
+        ],
+        3: []  // Vazio
+      };
+
+      document.getElementById('history_json').value = JSON.stringify(examples[exampleNum], null, 2);
+    }
+  </script>
+
+  <hr style="margin: 30px 0;">
+
+  <h2>📝 Exemplos Rápidos:</h2>
+  <button onclick="loadExample(1)"
+    style="background: #4caf50; color: white; padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; margin: 5px;">
+    Exemplo 1: Simples
+  </button>
+  <button onclick="loadExample(2)"
+    style="background: #4caf50; color: white; padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; margin: 5px;">
+    Exemplo 2: Com 3 mensagens
+  </button>
+  <button onclick="loadExample(3)"
+    style="background: #4caf50; color: white; padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; margin: 5px;">
+    Exemplo 3: Sem histórico
+  </button>
+
+  <hr style="margin: 30px 0;">
+
+  <h2>ℹ️ Instruções:</h2>
+  <ol>
+    <li>Configure as credenciais do Langflow acima (Host URL, Flow ID, API Key)</li>
+    <li>Edite o JSON do histórico ou use um dos exemplos</li>
+    <li>Clique em "Iniciar Chat com Histórico"</li>
+    <li>O chat deve abrir automaticamente com as mensagens do histórico</li>
+    <li>Abra o Console (F12) para ver os logs</li>
+  </ol>
+
+  <h2>🔍 Verificar:</h2>
+  <ul>
+    <li>As mensagens antigas devem aparecer no chat</li>
+    <li>Mensagens do utilizador (isSend: true) à direita</li>
+    <li>Mensagens do bot (isSend: false) à esquerda</li>
+    <li>Console deve mostrar: "Histórico injetado: X mensagens"</li>
+  </ul>
+
+</body>
+
+</html>

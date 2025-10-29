@@ -20,6 +20,8 @@ Langflow is a no-code open-source project that empowers developers to build cutt
 
 🌐 Multilingual Support: Communicate with users in multiple languages, opening up your application to a global audience.
 
+💾 **NEW: Chat History Support**: Load and restore previous conversation history from your database. Perfect for Laravel, PHP, or any backend! [See guide →](./CHAT_HISTORY_FEATURE.md)
+
 ## Installation
 
 ### Option 1: CDN Link
@@ -124,6 +126,7 @@ Use the widget API to customize your widget:
 | window_title          | string    | No       |
 | session_id            | string    | No       |
 | additional_headers    | json      | No       |
+| initial_messages      | json      | No       |
 
 **api_key:**
 - Type: String
@@ -287,9 +290,15 @@ Use the widget API to customize your widget:
 - Description: Additional headers to be sent to Langflow server
 - Example: `{ "X-Custom-Header": "value" }`
 
+**initial_messages:**
+- Type: JSON (Array)
+- Required: No
+- Description: Array of initial messages to pre-populate the chat history. Useful for restoring previous conversations from a database. Each message should have `message` (string), `isSend` (boolean), and optionally `error` (boolean).
+- Example: `[{"message": "Hello!", "isSend": true}, {"message": "Hi! How can I help?", "isSend": false}]`
+
 
 ## Live example:
-Try out or [live example](https://codesandbox.io/s/langflow-embedded-chat-example-dv9zpx) to see how the Langflow Embedded Chat ⛓️ works. 
+Try out or [live example](https://codesandbox.io/s/langflow-embedded-chat-example-dv9zpx) to see how the Langflow Embedded Chat ⛓️ works.
 
 1. first create a Flow and save it using [Langflow ⛓️](https://github.com/logspace-ai/langflow).
 2. Get the hosted URL to use in the live example.

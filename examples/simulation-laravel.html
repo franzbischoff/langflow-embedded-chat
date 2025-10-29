@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulação Laravel - Chat com Histórico</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/gh/logspace-ai/langflow-embedded-chat@v1.0.7/dist/build/static/js/bundle.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-box {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #2196f3;
+    }
+
+    .success-box {
+      background: #e8f5e9;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #4caf50;
+    }
+
+    .code {
+      background: #263238;
+      color: #aed581;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      overflow-x: auto;
+      margin: 10px 0;
+    }
+
+    button {
+      background: #2196f3;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 5px;
+    }
+
+    button:hover {
+      background: #1976d2;
+    }
+
+    .user-card {
+      display: inline-block;
+      background: #fff3e0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin: 10px;
+      border: 2px solid #ff9800;
+      cursor: pointer;
+    }
+
+    .user-card:hover {
+      background: #ffe0b2;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>🎭 Simulação: Laravel + jQuery + Chat com Histórico</h1>
+
+    <div class="info-box">
+      <h3>ℹ️ Sobre este exemplo</h3>
+      <p>Esta página <strong>simula</strong> uma aplicação Laravel onde:</p>
+      <ul>
+        <li>✅ O histórico é carregado do "banco de dados" (simulado em localStorage)</li>
+        <li>✅ Cada utilizador tem seu próprio histórico</li>
+        <li>✅ As novas mensagens são salvas automaticamente</li>
+        <li>✅ O session_id é único por utilizador</li>
+      </ul>
+    </div>
+
+    <h2>👤 Selecione um Utilizador:</h2>
+    <div id="users">
+      <div class="user-card" onclick="selectUser(1, 'João Silva')">
+        <h3>👨 João Silva</h3>
+        <p>ID: 1 | Cliente desde 2023</p>
+      </div>
+      <div class="user-card" onclick="selectUser(2, 'Maria Santos')">
+        <h3>👩 Maria Santos</h3>
+        <p>ID: 2 | Cliente desde 2024</p>
+      </div>
+      <div class="user-card" onclick="selectUser(3, 'Carlos Oliveira')">
+        <h3>👨 Carlos Oliveira</h3>
+        <p>ID: 3 | Novo cliente</p>
+      </div>
+    </div>
+
+    <div id="user-info" style="display: none;" class="success-box">
+      <h3>✅ Utilizador Selecionado: <span id="current-user-name"></span></h3>
+      <p>ID: <span id="current-user-id"></span></p>
+      <p>Mensagens no histórico: <span id="message-count">0</span></p>
+    </div>
+
+    <div id="actions" style="display: none; margin: 20px 0;">
+      <button onclick="loadChatWithHistory()">💬 Carregar Chat com Histórico</button>
+      <button onclick="addSampleHistory()">➕ Adicionar Mensagens de Teste</button>
+      <button onclick="clearUserHistory()">🗑️ Limpar Histórico deste Utilizador</button>
+      <button onclick="viewHistory()">👁️ Ver Histórico (JSON)</button>
+    </div>
+
+    <div id="chat-container"></div>
+
+    <hr style="margin: 40px 0;">
+
+    <h2>🔧 Como funciona (Simulação do Laravel):</h2>
+
+    <h3>1️⃣ Carregar Histórico (Laravel Controller):</h3>
+    <div class="code">
+      // Simulação do que acontece no backend Laravel
+      function getChatHistory(userId) {
+      // Em Laravel: DB::table('chat_messages')->where('user_id', userId)->get()
+      const key = 'chat_history_' + userId;
+      const history = localStorage.getItem(key);
+      return history ? JSON.parse(history) : [];
+      }
+    </div>
+
+    <h3>2️⃣ Injetar no Widget (Frontend jQuery):</h3>
+    <div class="code">
+      // No seu HTML Laravel + jQuery
+      $.get('/api/chat/history/' + userId, function(history) {
+      const chat = document.createElement('langflow-chat');
+      chat.setAttribute('host_url', '...');
+      chat.setAttribute('flow_id', '...');
+
+      // 🌟 Injetar histórico 🌟
+      if (history && history.length > 0) {
+      chat.setAttribute('initial_messages', JSON.stringify(history));
+      }
+
+      document.body.appendChild(chat);
+      });
+    </div>
+
+    <h3>3️⃣ Salvar Nova Mensagem (Laravel API):</h3>
+    <div class="code">
+      // Quando o utilizador envia uma mensagem
+      function saveMessage(userId, text, isUser) {
+      // Em Laravel: DB::table('chat_messages')->insert([...])
+      const history = getChatHistory(userId);
+      history.push({
+      message: text,
+      isSend: isUser,
+      timestamp: new Date().toISOString()
+      });
+      localStorage.setItem('chat_history_' + userId, JSON.stringify(history));
+      }
+    </div>
+
+    <hr style="margin: 40px 0;">
+
+    <div class="info-box">
+      <h3>📚 Arquivos de Exemplo Incluídos:</h3>
+      <ul>
+        <li>📄 <code>examples/LARAVEL_INTEGRATION.md</code> - Guia completo</li>
+        <li>📄 <code>examples/laravel/ChatHistoryController.php</code> - Controller Laravel</li>
+        <li>📄 <code>examples/laravel/*.php</code> - Migration, rotas, config</li>
+        <li>📄 <code>examples/laravel-jquery-history.html</code> - Exemplo integração</li>
+        <li>📄 <code>CHAT_HISTORY_FEATURE.md</code> - Documentação da funcionalidade</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    let currentUserId = null;
+    let currentUserName = null;
+
+    // Simula o banco de dados Laravel usando localStorage
+    const DB = {
+      getChatHistory: function (userId) {
+        const key = 'chat_history_' + userId;
+        const history = localStorage.getItem(key);
+        return history ? JSON.parse(history) : [];
+      },
+
+      saveChatHistory: function (userId, history) {
+        const key = 'chat_history_' + userId;
+        localStorage.setItem(key, JSON.stringify(history));
+      },
+
+      addMessage: function (userId, message, isSend) {
+        const history = this.getChatHistory(userId);
+        history.push({
+          message: message,
+          isSend: isSend,
+          timestamp: new Date().toISOString()
+        });
+        this.saveChatHistory(userId, history);
+        return history;
+      },
+
+      clearHistory: function (userId) {
+        const key = 'chat_history_' + userId;
+        localStorage.removeItem(key);
+      }
+    };
+
+    function selectUser(userId, userName) {
+      currentUserId = userId;
+      currentUserName = userName;
+
+      document.getElementById('user-info').style.display = 'block';
+      document.getElementById('actions').style.display = 'block';
+      document.getElementById('current-user-name').textContent = userName;
+      document.getElementById('current-user-id').textContent = userId;
+
+      updateMessageCount();
+
+      console.log('👤 Utilizador selecionado:', userName, '(ID:', userId, ')');
+    }
+
+    function updateMessageCount() {
+      const history = DB.getChatHistory(currentUserId);
+      document.getElementById('message-count').textContent = history.length;
+    }
+
+    function loadChatWithHistory() {
+      if (!currentUserId) {
+        alert('⚠️ Por favor, selecione um utilizador primeiro!');
+        return;
+      }
+
+      // Limpar chat anterior
+      document.getElementById('chat-container').innerHTML = '';
+
+      // Simula $.get('/api/chat/history/' + userId)
+      const history = DB.getChatHistory(currentUserId);
+
+      console.log('📥 Carregando histórico do utilizador', currentUserId);
+      console.log('📊 Encontradas', history.length, 'mensagens');
+
+      // Criar elemento do chat
+      const chatElement = document.createElement('langflow-chat');
+
+      // Configurações (ajuste para seu Langflow)
+      chatElement.setAttribute('host_url', 'http://localhost:7860');
+      chatElement.setAttribute('flow_id', 'seu-flow-id');
+      chatElement.setAttribute('api_key', 'sua-api-key');
+      chatElement.setAttribute('session_id', 'user-' + currentUserId);
+
+      // Configurações de interface
+      chatElement.setAttribute('window_title', 'Chat - ' + currentUserName);
+      chatElement.setAttribute('placeholder', 'Digite sua mensagem...');
+      chatElement.setAttribute('chat_position', 'bottom-right');
+      chatElement.setAttribute('width', '400');
+      chatElement.setAttribute('height', '600');
+      chatElement.setAttribute('start_open', 'true');
+
+      // ⭐ INJETAR HISTÓRICO ⭐
+      if (history && history.length > 0) {
+        chatElement.setAttribute('initial_messages', JSON.stringify(history));
+        console.log('✅ Histórico injetado no widget:', history);
+      } else {
+        console.log('ℹ️ Sem histórico para este utilizador');
+      }
+
+      document.getElementById('chat-container').appendChild(chatElement);
+
+      alert('✅ Chat carregado! Verifique as mensagens do histórico.');
+    }
+
+    function addSampleHistory() {
+      if (!currentUserId) {
+        alert('⚠️ Por favor, selecione um utilizador primeiro!');
+        return;
+      }
+
+      // Mensagens de exemplo diferentes para cada utilizador
+      const samples = {
+        1: [
+          { message: "Olá! Preciso de ajuda com meu pedido.", isSend: true },
+          { message: "Olá João! Claro, vou ajudá-lo. Qual é o número do pedido?", isSend: false },
+          { message: "É o pedido #12345", isSend: true },
+          { message: "Encontrei seu pedido! Ele foi enviado ontem e deve chegar em 2 dias.", isSend: false }
+        ],
+        2: [
+          { message: "Boa tarde! Gostaria de informações sobre produtos.", isSend: true },
+          { message: "Boa tarde Maria! Temos várias categorias. O que procura?", isSend: false },
+          { message: "Estou procurando notebooks.", isSend: true }
+        ],
+        3: [
+          { message: "Olá! Sou novo aqui.", isSend: true },
+          { message: "Bem-vindo Carlos! Como posso ajudá-lo hoje?", isSend: false }
+        ]
+      };
+
+      const userSamples = samples[currentUserId] || samples[1];
+      DB.saveChatHistory(currentUserId, userSamples);
+
+      updateMessageCount();
+      alert('✅ Mensagens de teste adicionadas! Clique em "Carregar Chat" para ver.');
+      console.log('✅ Histórico salvo:', userSamples);
+    }
+
+    function clearUserHistory() {
+      if (!currentUserId) {
+        alert('⚠️ Por favor, selecione um utilizador primeiro!');
+        return;
+      }
+
+      if (confirm('🗑️ Tem certeza que deseja limpar o histórico de ' + currentUserName + '?')) {
+        DB.clearHistory(currentUserId);
+        updateMessageCount();
+        document.getElementById('chat-container').innerHTML = '';
+        alert('✅ Histórico limpo!');
+        console.log('🗑️ Histórico do utilizador', currentUserId, 'foi limpo');
+      }
+    }
+
+    function viewHistory() {
+      if (!currentUserId) {
+        alert('⚠️ Por favor, selecione um utilizador primeiro!');
+        return;
+      }
+
+      const history = DB.getChatHistory(currentUserId);
+      console.log('📋 Histórico completo:', history);
+      alert('Histórico JSON (verifique o console):\n\n' + JSON.stringify(history, null, 2).substring(0, 500) + '...');
+    }
+
+    // Log inicial
+    console.log('🎭 Simulação Laravel inicializada');
+    console.log('💾 Dados salvos em localStorage para simular banco de dados');
+  </script>
+</body>
+
+</html>

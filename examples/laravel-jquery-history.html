@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Langflow Chat com Histórico - Laravel + jQuery</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script
+    src="https://cdn.jsdelivr.net/gh/logspace-ai/langflow-embedded-chat@v1.0.7/dist/build/static/js/bundle.min.js"></script>
+</head>
+
+<body>
+  <h1>Exemplo de Chat com Histórico</h1>
+
+  <!-- O elemento do chat -->
+  <div id="chat-container"></div>
+
+  <script>
+    $(document).ready(function () {
+      // ID do utilizador (pode vir do Laravel via Blade)
+      const userId = "{{ auth()->user()->id ?? 'guest' }}";
+
+      // Função para carregar o histórico da base de dados
+      function loadChatHistory() {
+        return $.ajax({
+          url: '/api/chat/history/' + userId,  // Ajuste para sua rota Laravel
+          method: 'GET',
+          dataType: 'json'
+        });
+      }
+
+      // Função para inicializar o chat com histórico
+      function initializeChat(history) {
+        // Criar o elemento do chat
+        const chatElement = document.createElement('langflow-chat');
+
+        // Configurar as propriedades básicas
+        chatElement.setAttribute('host_url', 'https://seu-langflow-url.com');
+        chatElement.setAttribute('flow_id', 'seu-flow-id');
+        chatElement.setAttribute('api_key', 'sua-api-key');
+
+        // Configurar session_id único para o utilizador
+        chatElement.setAttribute('session_id', 'user-' + userId);
+
+        // Configurações opcionais
+        chatElement.setAttribute('window_title', 'Suporte');
+        chatElement.setAttribute('placeholder', 'Digite sua mensagem...');
+        chatElement.setAttribute('chat_position', 'bottom-right');
+        chatElement.setAttribute('start_open', 'false');
+
+        // IMPORTANTE: Injetar o histórico de mensagens
+        // O histórico deve estar no formato:
+        // [{"message": "texto", "isSend": true/false}, ...]
+        if (history && history.length > 0) {
+          chatElement.setAttribute('initial_messages', JSON.stringify(history));
+        }
+
+        // Adicionar o elemento ao container
+        document.getElementById('chat-container').appendChild(chatElement);
+      }
+
+      // Carregar histórico e inicializar o chat
+      loadChatHistory()
+        .done(function (history) {
+          console.log('Histórico carregado:', history);
+          initializeChat(history);
+        })
+        .fail(function (error) {
+          console.error('Erro ao carregar histórico:', error);
+          // Inicializar sem histórico em caso de erro
+          initializeChat([]);
+        });
+    });
+  </script>
+</body>
+
+</html>
